@@ -17,7 +17,6 @@ import {
 import useAuth from '@/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { RiUserSettingsLine } from 'react-icons/ri';
-import { useUserInfo } from '@/store/userInfoStore';
 
 interface MenuItem {
   key: string;
@@ -25,14 +24,11 @@ interface MenuItem {
   icon: JSX.Element;
   activeIcon: JSX.Element;
   href: string;
-  permissions?: string[]; // Thêm trường permissions
 }
 
 export default function Sidebar() {
   const { t } = useTranslation();
-  const { userInfo } = useUserInfo(); 
 
-  // Đây là danh sách menu với các quyền tương ứng
   const listMenu = [
     {
       key: 'employee_management',
@@ -47,8 +43,7 @@ export default function Sidebar() {
           <RiUserSettingsLine size={24} color='white' />
         </div>
       ),
-      href: ROUTERS_PATHS.EMPLOYEE_MANAGEMENT,
-      permissions: ['permission.employee.create']
+      href: ROUTERS_PATHS.EMPLOYEE_MANAGEMENT
     },
     {
       key: 'department_management',
@@ -63,25 +58,8 @@ export default function Sidebar() {
           <RiUserSettingsLine size={24} color='white' />
         </div>
       ),
-      href: ROUTERS_PATHS.DEPARTMENT_MANAGEMENT,
-      permissions: ['permission.department.create']
+      href: ROUTERS_PATHS.DEPARTMENT_MANAGEMENT
     },
-    {
-      key: 'attendance_management',
-      title: 'Attendance Management',
-      icon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='#667097' />
-        </div>
-      ),
-      activeIcon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='white' />
-        </div>
-      ),
-      href: ROUTERS_PATHS.ATTENDANCE_MANAGEMENT,
-    },
-    // Giữ nguyên các menu khác và thêm permissions nếu cần
     {
       key: 'role',
       title: 'Role',
@@ -95,120 +73,24 @@ export default function Sidebar() {
           <RiUserSettingsLine size={24} color='white' />
         </div>
       ),
-      href: ROUTERS_PATHS.ROLES,
+      href: ROUTERS_PATHS.ROLES
     },
-    {
-      key: 'attendance',
-      title: 'Attendance',
-      icon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='#667097' />
-        </div>
-      ),
-      activeIcon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='white' />
-        </div>
-      ),
-      href: ROUTERS_PATHS.ATTENDANCE,
-      // Không cần permission vì mọi người đều cần xem attendance của mình
-    },
-    {
-      key: 'overtime_request',
-      title: 'Overtime Request',
-      icon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='#667097' />
-        </div>
-      ),
-      activeIcon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='white' />
-        </div>
-      ),
-      href: ROUTERS_PATHS.OVERTIME_REQUEST
-    },
-    {
-      key: 'leave',
-      title: 'Leave Request',
-      icon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='#667097' />
-        </div>
-      ),
-      activeIcon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='white' />
-        </div>
-      ),
-      href: ROUTERS_PATHS.LEAVE
-    },
-    {
-      key: 'salary',
-      title: 'Salary',
-      icon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='#667097' />
-        </div>
-      ),
-      activeIcon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='white' />
-        </div>
-      ),
-      href: ROUTERS_PATHS.SALARY
-    },
-    {
-      key: 'notification',
-      title: 'Notification',
-      icon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='#667097' />
-        </div>
-      ),
-      activeIcon: (
-        <div className='h-6 w-6'>
-          <RiUserSettingsLine size={24} color='white' />
-        </div>
-      ),
-      href: ROUTERS_PATHS.NOTIFICATION
-    }
   ];
-
-  // Kiểm tra user có quyền truy cập menu không
-  const hasPermission = (menu: MenuItem): boolean => {
-    // Nếu menu không yêu cầu quyền, cho phép truy cập
-    if (!menu.permissions || menu.permissions.length === 0) {
-      return true;
-    }
-
-    // Kiểm tra xem user có quyền không
-    if (!userInfo || !userInfo.permissions) {
-      return false;
-    }
-
-    // Kiểm tra xem user có ít nhất một quyền trong danh sách quyền yêu cầu
-    return menu.permissions.some(permission => 
-      userInfo.permissions.includes(permission)
-    );
-  };
-
-  // Lọc menu mà user có quyền xem
-  const filteredMenu = listMenu.filter(menu => hasPermission(menu));
-
+  // const [menu, setMenu] = React.useState<MenuItem[]>(listMenu);
   const [selectedMenu, setSelectedMenu] = React.useState<string>('');
   const currentPath = window.location.pathname;
+
+  console.log(currentPath);
   const { signOut } = useAuth();
 
   const handleClickMenu = (key: string) => {
     setSelectedMenu(key);
   };
 
-  // Cập nhật useEffect để dùng filteredMenu thay vì listMenu
   React.useEffect(() => {
-    const mainMenu = [...filteredMenu].reverse()?.find(m => currentPath.includes(m.href));
+    const mainMenu = listMenu.reverse()?.find(m => currentPath.includes(m.href));
     setSelectedMenu(mainMenu?.key || '');
-  }, [currentPath, filteredMenu]);
+  }, [currentPath]);
 
   const handleLogout = () => {
     signOut();
@@ -217,7 +99,7 @@ export default function Sidebar() {
   return (
     <div className='w-full flex flex-col h-[calc(100%-170px)] justify-between mt-[90px] pr-4 overflow-y-auto'>
       <div>
-        {filteredMenu.map((e: MenuItem) => {
+        {listMenu.map((e: MenuItem) => {
           const activeMenu = selectedMenu === e?.key;
 
           return (

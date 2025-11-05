@@ -26,12 +26,6 @@ export default function MainLayout(props: MainLayoutProps) {
         return 'Employee Management';
       case ROUTERS_PATHS.DEPARTMENT_MANAGEMENT:
         return 'Department Management';
-      case ROUTERS_PATHS.ATTENDANCE_MANAGEMENT:
-        return 'Attendance Management';
-      case ROUTERS_PATHS.OVERTIME_REQUEST:
-        return 'Overtime Request';
-      case ROUTERS_PATHS.SALARY:
-        return 'Salary';
       default:
         return t('content.clientList');
     }
